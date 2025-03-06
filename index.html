@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใส่ข้อความบนรูปภาพ</title>
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background-color: #f4f4f4; 
+            text-align: center; 
+            padding: 20px; 
+            color: #333;
+            margin: 0;
+        }
+        h2 { 
+            font-size: 2.5em; 
+            color: #4CAF50; 
+            margin-bottom: 20px;
+        }
+        button { 
+            background-color: #4CAF50; 
+            color: white; 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        button:hover { 
+            background-color: #45a049; 
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+        button:active {
+            background-color: #388E3C;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transform: translateY(2px);
+        }
+        .control-group, .radio-group { 
+            margin-top: 20px; 
+            text-align: left;
+        }
+        .radio-group span { 
+            font-weight: bold; 
+            display: inline-block; 
+            width: 140px;
+            margin-bottom: 8px;
+        }
+        .radio-group input, .control-group input, .control-group select, .control-group textarea {
+            font-size: 1em;
+            padding: 10px;
+            width: 80%;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        .radio-group input[type="radio"], .radio-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+        .control-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        canvas { 
+            border: 2px solid #000; 
+            margin-top: 20px; 
+            max-width: 100%; 
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .control-group label {
+            font-size: 1.1em;
+            display: block;
+            margin: 8px 0;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .control-group select, .control-group input[type="color"] {
+            width: 70%;
+            margin: 10px 0;
+        }
+        #textSizeValue { 
+            font-weight: bold; 
+            font-size: 1.2em;
+        }
+        #positionSelect {
+            width: 60%;
+            margin: 10px 0;
+        }
+        .footer {
+            margin-top: 30px;
+        }
+        .footer button {
+            background-color: #ff5722;
+        }
+        .footer button:hover {
+            background-color: #e64a19;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Sriracha&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h2>เพิ่มข้อความลงบนรูปภาพ</h2>
+
+    <div>
+        <button onclick="chooseUpload('camera')">📸 ถ่ายภาพ</button>
+        <button onclick="chooseUpload('file')">📂 อัปโหลดรูป</button>
+    </div>
+
+    <input type="file" id="cameraCapture" accept="image/*" capture="environment" style="display: none;">
+    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+
+    <div class="control-group">
+        <h3>ID2599</h3>
+
+        <div class="radio-group">
+            <span>Mobile care+:</span>
+            <input type="radio" name="mobileCare" value="รับ"> รับ
+            <input type="radio" name="mobileCare" value="ไม่รับ"> ไม่รับ
+            <input type="checkbox" id="mobileInclude"> ใส่ลงในรูปภาพ
+        </div>
+
+        <div class="radio-group">
+            <span>7 care+:</span>
+            <input type="radio" name="care" value="รับ"> รับ
+            <input type="radio" name="care" value="ไม่รับ"> ไม่รับ
+            <input type="checkbox" id="careInclude"> ใส่ลงในรูปภาพ
+        </div>
+
+        <div class="radio-group">
+            <span>Sim:</span>
+            <input type="radio" name="sim" value="รับ"> รับ
+            <input type="radio" name="sim" value="ไม่รับ"> ไม่รับ
+        </div>
+
+        <div class="radio-group">
+            <span>Sandisk:</span>
+            <input type="radio" name="sandisk" value="รับ"> รับ
+            <input type="radio" name="sandisk" value="ไม่รับ"> ไม่รับ
+        </div>
+
+        <div class="radio-group">
+            <span>Film:</span>
+            <input type="radio" name="film" value="รับ"> รับ
+            <input type="radio" name="film" value="ไม่รับ"> ไม่รับ
+        </div>
+
+        <div class="radio-group">
+            <span>BTB:</span>
+            <input type="radio" name="btb" value="รับ"> รับ
+            <input type="radio" name="btb" value="ไม่รับ"> ไม่รับ
+        </div>
+    </div>
+
+    <textarea id="textInput" placeholder="ใส่ข้อความที่นี่ (หลายบรรทัด)"></textarea><br><br>
+
+    <div class="control-group">
+        <label>ขนาดข้อความ:</label>
+        <input type="range" id="textSize" value="200" min="10" max="300" oninput="updateTextSize(this.value)">
+        <span id="textSizeValue">200</span><br><br>
+
+        <label>สีข้อความ:</label>
+        <input type="color" id="textColor" value="#FFFFFF"><br><br>
+        <label>สีพื้นหลังของข้อความ:</label>
+        <input type="color" id="bgColor" value="#000000"><br><br>
+
+        <label>ใส่พื้นหลังข้อความ:</label>
+        <input type="checkbox" id="addBackground"><br><br>
+
+        <label>สีกรอบข้อความ:</label>
+        <input type="color" id="borderColor" value="#000000"><br><br>
+        <label>ความหนากรอบข้อความ:</label>
+        <input type="range" id="borderThickness" value="2" min="1" max="10"><br><br>
+
+        <label>ตำแหน่งข้อความ:</label>
+        <select id="positionSelect">
+            <option value="top">บน</option>
+            <option value="center">กลาง</option>
+            <option value="bottom">ล่าง</option>
+        </select><br><br>
+
+        <label>ฟอนต์ข้อความ:</label>
+        <select id="fontSelect">
+            <option value="Arial">Arial</option>
+            <option value="Sriracha">Sriracha</option>
+        </select>
+    </div>
+
+    <div>
+        <button onclick="addTextToImage()">เพิ่มข้อความ</button>
+    </div>
+
+    <canvas id="canvas"></canvas><br><br>
+
+    <div class="footer">
+        <button onclick="downloadImage()">ดาวน์โหลดรูป</button>
+    </div>
+
+    <script>
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+        let img = new Image();
+
+        function chooseUpload(type) {
+            if (type === 'camera') {
+                document.getElementById('cameraCapture').click();
+            } else {
+                document.getElementById('imageUpload').click();
+            }
+        }
+
+        function handleImageUpload(event) {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
+        document.getElementById('cameraCapture').addEventListener('change', handleImageUpload);
+
+        function updateTextSize(value) {
+            document.getElementById('textSizeValue').innerText = value;
+        }
+
+        function addTextToImage() {
+            if (!img.src) {
+                alert("กรุณาถ่ายภาพหรืออัปโหลดรูปก่อน");
+                return;
+            }
+
+            let text = document.getElementById('textInput').value;
+            let textSize = parseInt(document.getElementById('textSize').value);
+            let textColor = document.getElementById('textColor').value;
+            let bgColor = document.getElementById('bgColor').value;
+            let addBackground = document.getElementById('addBackground').checked;
+            let borderColor = document.getElementById('borderColor').value;
+            let borderThickness = parseInt(document.getElementById('borderThickness').value);
+            let position = document.getElementById('positionSelect').value;
+            let font = document.getElementById('fontSelect').value;
+
+            let options = [
+                { name: "Mobile care+", value: document.querySelector('input[name="mobileCare"]:checked'), include: document.getElementById('mobileInclude').checked },
+                { name: "7 care+", value: document.querySelector('input[name="care"]:checked'), include: document.getElementById('careInclude').checked },
+                { name: "Sim", value: document.querySelector('input[name="sim"]:checked'), include: true },
+                { name: "Sandisk", value: document.querySelector('input[name="sandisk"]:checked'), include: true },
+                { name: "Film", value: document.querySelector('input[name="film"]:checked'), include: true },
+                { name: "BTB", value: document.querySelector('input[name="btb"]:checked'), include: true }
+            ];
+
+            let lines = ["ID2599"];
+            if (text) lines.push(...text.split('\n'));
+
+            options.forEach(option => {
+                if (option.value && option.include) {
+                    lines.push(`${option.name}: ${option.value.value}`);
+                }
+            });
+
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            ctx.font = `${textSize}px ${font}`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            let lineHeight = textSize * 1.5;
+            let y = position === 'top' ? lineHeight : (position === 'center' ? (canvas.height - lines.length * lineHeight) / 2 + lineHeight / 2 : canvas.height - lines.length * lineHeight + lineHeight / 2);
+
+            lines.forEach(line => {
+                let textWidth = ctx.measureText(line).width;
+                let padding = 10;
+                let x = canvas.width / 2;
+
+                if (addBackground) {
+                    // Draw rounded background for text
+                    ctx.fillStyle = bgColor;
+                    ctx.beginPath();
+                    ctx.moveTo(x - textWidth / 2 - padding, y - textSize / 2 - padding);
+                    ctx.lineTo(x + textWidth / 2 + padding, y - textSize / 2 - padding);
+                    ctx.lineTo(x + textWidth / 2 + padding, y + textSize / 2 + padding);
+                    ctx.lineTo(x - textWidth / 2 - padding, y + textSize / 2 + padding);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+
+                // Draw text
+                ctx.fillStyle = textColor;
+                ctx.fillText(line, x, y);
+
+                if (borderThickness > 0) {
+                    // Draw border around text
+                    ctx.lineWidth = borderThickness;
+                    ctx.strokeStyle = borderColor;
+                    ctx.strokeText(line, x, y);
+                }
+
+                y += lineHeight;
+            });
+        }
+
+        function downloadImage() {
+            let canvasData = canvas.toDataURL("image/png");
+            let blob = dataURLtoBlob(canvasData);
+            let url = URL.createObjectURL(blob);
+
+            let link = document.createElement('a');
+            link.href = url;
+            link.download = 'edited-image.png';
+            link.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        function dataURLtoBlob(dataURL) {
+            let byteString = atob(dataURL.split(',')[1]);
+            let arrayBuffer = new ArrayBuffer(byteString.length);
+            let uintArray = new Uint8Array(arrayBuffer);
+            for (let i = 0; i < byteString.length; i++) {
+                uintArray[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([uintArray], { type: 'image/png' });
+        }
+    </script>
+</body>
+</html>
